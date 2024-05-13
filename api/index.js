@@ -20,12 +20,34 @@ app.get("/test", (req,res)=>{
 });
 app.post("/register", async (req,res)=>{
     const {name,email,password}= req.body;
-    const user = await UserModel.create({
-        name,
-        email,
-        password:bcrypt.hashSync(password,bcyrptSalt),
-    });
-    res.json(user);
+    try{
+        const user = await UserModel.create({
+            name,
+            email,
+            password:bcrypt.hashSync(password,bcyrptSalt),
+        });
+        res.json(user);
+    } catch(e){
+        res.status(422).json(e);
+    }
+   
+    
 });
+app.post("/login", async (req,res)=>{
+    const {email,password}=req.body;
+    const user= await UserModel.findOne({email});
+    if(user){
+        const passOk= bcrypt.compareSync(password, user.password);
+        if(passOk){
+            
+            res.json("pass ok");
+        }
+        else{
+            res.status(422).json("pass not ok");
+        }
+    }else{
+        res.json("not found");
+    }
+})
 
 app.listen(4000);
